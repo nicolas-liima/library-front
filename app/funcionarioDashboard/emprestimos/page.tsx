@@ -8,7 +8,7 @@ const EmprestimosPage: React.FC = () => {
   const [emprestimos, setEmprestimos] = useState<Emprestimo[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<string>('todos');  // Estado para o filtro
+  const [filter, setFilter] = useState<string>('todos');
 
   // Função memoizada para buscar empréstimos
   const fetchEmprestimos = useCallback(async () => {
@@ -25,7 +25,7 @@ const EmprestimosPage: React.FC = () => {
           result = await EmprestimosService.buscarEmprestimosFinalizados();
           break;
         default:
-          result = await EmprestimosService.buscarTodosOsEmprestimos(); // Buscar todos os empréstimos
+          result = await EmprestimosService.buscarTodosOsEmprestimos();
       }
       setEmprestimos(result);
     } catch {
@@ -33,15 +33,14 @@ const EmprestimosPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [filter]);  // Dependência no filtro para refazer a requisição quando mudar
+  }, [filter]);
 
-  // Efeito para atualizar a lista de empréstimos sempre que o filtro mudar
   useEffect(() => {
     fetchEmprestimos();
-  }, [fetchEmprestimos]);  // Agora a função fetchEmprestimos está na lista de dependências
+  }, [fetchEmprestimos]);
 
   if (loading) {
-    return <div className="text-center text-lg text-gray-600">Carregando...</div>;
+    return <div className="text-center text-lg text-gray-800">Carregando...</div>;
   }
 
   if (error) {
@@ -49,10 +48,9 @@ const EmprestimosPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="max-w-4xl mx-auto p-8 bg-gray-50 rounded-lg shadow-lg text-black">
       <h1 className="text-4xl font-semibold text-center text-indigo-600 mb-8">Lista de Empréstimos</h1>
-      
-      {/* Filtros de status */}
+
       <div className="mb-6 flex justify-center space-x-4">
         <button
           onClick={() => setFilter('todos')}
@@ -80,37 +78,42 @@ const EmprestimosPage: React.FC = () => {
         </button>
       </div>
 
-      {/* Tabela de empréstimos */}
-      <div className="overflow-x-auto shadow-md rounded-lg bg-white">
-        <table className="min-w-full text-sm">
-          <thead className="bg-indigo-100 text-indigo-700">
-            <tr>
-              <th className="py-3 px-4 text-left font-medium">ID</th>
-              <th className="py-3 px-4 text-left font-medium">ISBN</th>
-              <th className="py-3 px-4 text-left font-medium">Username</th>
-              <th className="py-3 px-4 text-left font-medium">Data de Empréstimo</th>
-              <th className="py-3 px-4 text-left font-medium">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {emprestimos.map((emprestimo) => (
-              <tr key={emprestimo.id} className="hover:bg-indigo-50 transition-all">
-                <td className="py-3 px-4">{emprestimo.id}</td>
-                <td className="py-3 px-4">{emprestimo.isbn}</td>
-                <td className="py-3 px-4">{emprestimo.username}</td>
-                <td className="py-3 px-4">{new Date(emprestimo.dataEmprestimo).toLocaleDateString()}</td>
-                <td className="py-3 px-4">
-                  {emprestimo.atrasado ? (
-                    <span className="text-red-500 font-semibold">Atrasado</span>
-                  ) : (
-                    <span className="text-green-500 font-semibold">Ativo</span>
-                  )}
-                </td>
+      {emprestimos.length === 0 ? (
+        <div className="text-center text-lg text-gray-500">Nenhum empréstimo encontrado para o filtro selecionado.</div>
+      ) : (
+        <div className="overflow-x-auto shadow-md rounded-lg bg-white">
+          <table className="min-w-full text-sm">
+            <thead className="bg-indigo-100 text-indigo-700">
+              <tr>
+                <th className="py-3 px-4 text-left font-medium">ID</th>
+                <th className="py-3 px-4 text-left font-medium">ISBN</th>
+                <th className="py-3 px-4 text-left font-medium">Username</th>
+                <th className="py-3 px-4 text-left font-medium">Data de Empréstimo</th>
+                <th className="py-3 px-4 text-left font-medium">Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {emprestimos.map((emprestimo) => (
+                <tr key={emprestimo.id} className="hover:bg-indigo-50 transition-all">
+                  <td className="py-3 px-4 text-gray-800">{emprestimo.id}</td>
+                  <td className="py-3 px-4 text-gray-800">{emprestimo.livro.titulo}</td>
+                  <td className="py-3 px-4 text-gray-800">{emprestimo.usuario.nome}</td>
+                  <td className="py-3 px-4 text-gray-800">
+                    {new Date(emprestimo.dataEmprestimo).toLocaleDateString()}
+                  </td>
+                  <td className="py-3 px-4 text-gray-800">
+                    {emprestimo.atrasado ? (
+                      <span className="text-red-500 font-semibold">Atrasado</span>
+                    ) : (
+                      <span className="text-green-500 font-semibold">Ativo</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };

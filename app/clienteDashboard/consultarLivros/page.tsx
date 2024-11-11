@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { LivrosService } from '../../../service/livrosService';
 import { Livros } from '../../types/Livros';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../context/AuthContext';
 
 const ConsultarLivros = () => {
   const [livros, setLivros] = useState<Livros[]>([]);
@@ -12,14 +11,7 @@ const ConsultarLivros = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [filtro, setFiltro] = useState('titulo');
   const [termoBusca, setTermoBusca] = useState('');
-  const { user } = useAuth();
   const router = useRouter();
-
-  useEffect(() => {
-    if (!user) {
-      router.push('/login');
-    }
-  }, [user, router]);
 
   const buscarLivros = async () => {
     setErro(null);

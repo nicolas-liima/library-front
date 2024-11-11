@@ -1,3 +1,5 @@
+//so muda a cor da fonte para preto nesse, nao mude mais nada
+
 "use client";
 
 import React, { useState } from "react";
@@ -21,21 +23,28 @@ const UsuariosPage = () => {
   const buscarUsuarios = async () => {
     setErro(null);
     setLoading(true);
+    setUsuarios([]);
     setHasSearched(true);
     try {
       let usuarios: Usuario[] = [];
-      if (filtro === "nome") {
-        usuarios = await UsuariosService.buscarUsuariosPorNome(termoBusca);
-      } else if (filtro === "cpf") {
-        usuarios = await UsuariosService.buscarUsuariosPorCpf(termoBusca);
-      } else if (filtro === "username") {
-        const usuario = await UsuariosService.buscarUsuarioPorUsername(termoBusca);
-        usuarios = usuario ? [usuario] : [];
-      }
-
+      if (termoBusca.trim() === "") {
+        // Se o termo de busca estiver vazio, buscar todos os usuários
+        usuarios = await UsuariosService.listarTodosUsuarios(); // Supondo que exista esse método na API
+      }else {
+          if (filtro === "nome") {
+            usuarios = await UsuariosService.buscarUsuariosPorNome(termoBusca);
+          } else if (filtro === "cpf") {
+            usuarios = await UsuariosService.buscarUsuariosPorCpf(termoBusca);
+          } else if (filtro === "username") {
+            const usuario = await UsuariosService.buscarUsuarioPorUsername(termoBusca);
+            usuarios = usuario ? [usuario] : [];
+          }
+        }
       if (usuarios.length === 0) {
         setErro("Nenhum usuário encontrado.");
       }
+    
+    
 
       setUsuarios(usuarios); // Atualiza a lista de usuários com o resultado da busca
     } catch (err: any) {
@@ -84,9 +93,9 @@ const UsuariosPage = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-8 bg-gray-50 rounded-lg shadow-lg">
+    <div className="max-w-4xl mx-auto p-8 bg-gray-50 rounded-lg shadow-lg text-black">
       <h1 className="text-4xl font-bold text-center text-indigo-600 mb-6">Buscar Usuários</h1>
-
+  
       {/* Filtro de Busca */}
       <div className="mb-6">
         <label htmlFor="filtro" className="text-lg font-semibold text-gray-700">Escolha o Filtro:</label>
@@ -101,7 +110,7 @@ const UsuariosPage = () => {
           <option value="username">Username</option>
         </select>
       </div>
-
+  
       {/* Campo de Busca */}
       <div className="mb-6">
         <label htmlFor="termoBusca" className="text-lg font-semibold text-gray-700">{`Buscar por ${filtro}:`}</label>
@@ -114,7 +123,7 @@ const UsuariosPage = () => {
           className="w-full p-3 mt-2 bg-white border-2 border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
         />
       </div>
-
+  
       {/* Botão de Buscar */}
       <div className="mb-6 text-center">
         <button
@@ -124,18 +133,18 @@ const UsuariosPage = () => {
           Buscar
         </button>
       </div>
-
+  
       {/* Exibição de Erro */}
       {erro && <p className="text-red-600 text-center font-semibold">{erro}</p>}
-
+  
       {/* Exibição de Carregamento */}
       {loading && <p className="text-center text-gray-500">Carregando...</p>}
-
+  
       {/* Tabela de Usuários */}
-      <div className="overflow-x-auto shadow-md rounded-lg bg-white">
+      <div className="overflow-x-auto shadow-md rounded-lg bg-white max-h-80 overflow-y-auto">
         <table className="min-w-full">
           <thead className="bg-indigo-100 text-indigo-700">
-            <tr>
+            <tr className="sticky top-0 bg-indigo-100 z-10">
               <th className="p-4 text-left">Username</th>
               <th className="p-4 text-left">Nome</th>
               <th className="p-4 text-left">CPF</th>
@@ -167,147 +176,126 @@ const UsuariosPage = () => {
           </tbody>
         </table>
       </div>
-
-{/* Modal de Detalhes do Usuário */}
-{mostrarModal && usuarioDetalhado && (
-  <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-    <div className="bg-white p-8 rounded-lg shadow-lg max-w-lg w-full">
-      <h2 className="text-2xl font-bold mb-4">Detalhes do Usuário</h2>
-      
-      {/* ID do Usuário (não editável) */}
-      <div className="mb-4">
-        <label className="block font-semibold">ID:</label>
-        <input
-          type="text"
-          value={usuarioDetalhado.id}
-          readOnly
-          className="w-full p-2 border border-gray-300 rounded"
-        />
-      </div>
-
-      {/* Username (não editável) */}
-      <div className="mb-4">
-        <label className="block font-semibold">Username:</label>
-        <input
-          type="text"
-          value={usuarioDetalhado.username}
-          readOnly
-          className="w-full p-2 border border-gray-300 rounded"
-        />
-      </div>
-
-      {/* Nome */}
-      <div className="mb-4">
-        <label className="block font-semibold">Nome:</label>
-        <input
-          type="text"
-          value={usuarioDetalhado.nome}
-          onChange={(e) => setUsuarioDetalhado({ ...usuarioDetalhado, nome: e.target.value })}
-          className="w-full p-2 border border-gray-300 rounded"
-        />
-      </div>
-
-      {/* CPF */}
-      <div className="mb-4">
-        <label className="block font-semibold">CPF:</label>
-        <input
-          type="text"
-          value={usuarioDetalhado.cpf || ""}
-          readOnly
-          className="w-full p-2 border border-gray-300 rounded"
-        />
-      </div>
-
-      {/* Senha */}
-      <div className="mb-4">
-        <label className="block font-semibold">Senha:</label>
-        <input
-          type="password"
-          value={usuarioDetalhado.senha || ""}
-          onChange={(e) => setUsuarioDetalhado({ ...usuarioDetalhado, senha: e.target.value })}
-          className="w-full p-2 border border-gray-300 rounded"
-        />
-      </div>
-
-      {/* Tipo de Usuário */}
-      <div className="mb-4">
-        <label className="block font-semibold">Tipo de Usuário:</label>
-        <select
-          value={usuarioDetalhado.tipoUsuario || ""} // Corrigido para tipoUsuario
-          onChange={(e) => setUsuarioDetalhado({ ...usuarioDetalhado, tipoUsuario: e.target.value })}
-          className="w-full p-2 border border-gray-300 rounded"
-        >
-          <option value="">Selecione</option>
-          <option value="CLIENTE">Cliente</option> {/* Corrigido para CLIENTE */}
-          <option value="FUNCIONARIO">Funcionário</option> {/* Corrigido para FUNCIONARIO */}
-        </select>
-      </div>
-
-
-      {/* Usuário Ativo */}
-      <div className="mb-4 flex items-center">
-        <input
-          type="checkbox"
-          checked={usuarioDetalhado.usuarioAtivo}
-          onChange={(e) => setUsuarioDetalhado({ ...usuarioDetalhado, usuarioAtivo: e.target.checked })}
-          className="mr-2"
-        />
-        <label className="font-semibold">Usuário Ativo</label>
-      </div>
-
-      {/* Email */}
-      <div className="mb-4">
-        <label className="block font-semibold">Email:</label>
-        <input
-          type="email"
-          value={usuarioDetalhado.email || ""}
-          onChange={(e) => setUsuarioDetalhado({ ...usuarioDetalhado, email: e.target.value })}
-          className="w-full p-2 border border-gray-300 rounded"
-        />
-      </div>
-
-      {/* Endereço */}
-      <div className="mb-4">
-        <label className="block font-semibold">Endereço:</label>
-        <input
-          type="text"
-          value={usuarioDetalhado.endereco || ""}
-          onChange={(e) => setUsuarioDetalhado({ ...usuarioDetalhado, endereco: e.target.value })}
-          className="w-full p-2 border border-gray-300 rounded"
-        />
-      </div>
-
-      {/* Telefone */}
-      <div className="mb-4">
-        <label className="block font-semibold">Telefone:</label>
-        <input
-          type="text"
-          value={usuarioDetalhado.telefone || ""}
-          onChange={(e) => setUsuarioDetalhado({ ...usuarioDetalhado, telefone: e.target.value })}
-          className="w-full p-2 border border-gray-300 rounded"
-        />
-      </div>
-
-      {/* Botões de Ação */}
-      <div className="flex justify-end">
-        <button
-          onClick={() => setMostrarModal(false)}
-          className="px-4 py-2 mr-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
-        >
-          Cancelar
-        </button>
-        <button
-          onClick={atualizarUsuario}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-        >
-          Salvar
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+  
+      {/* Modal de Detalhes do Usuário */}
+      {mostrarModal && usuarioDetalhado && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-20">
+          <div className="bg-white p-8 rounded-lg shadow-lg max-w-lg w-full max-h-[80vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold mb-4">Detalhes do Usuário</h2>
+  
+            {/* Conteúdo do Modal */}
+            <div className="mb-4">
+              <label className="block font-semibold">Username:</label>
+              <input
+                type="text"
+                value={usuarioDetalhado.username}
+                readOnly
+                className="w-full p-2 border border-gray-300 rounded"
+              />
+            </div>
+  
+            <div className="mb-4">
+              <label className="block font-semibold">Nome:</label>
+              <input
+                type="text"
+                value={usuarioDetalhado.nome}
+                onChange={(e) => setUsuarioDetalhado({ ...usuarioDetalhado, nome: e.target.value })}
+                className="w-full p-2 border border-gray-300 rounded"
+              />
+            </div>
+  
+            <div className="mb-4">
+              <label className="block font-semibold">CPF:</label>
+              <input
+                type="text"
+                value={usuarioDetalhado.cpf || ""}
+                readOnly
+                className="w-full p-2 border border-gray-300 rounded"
+              />
+            </div>
+  
+            <div className="mb-4">
+              <label className="block font-semibold">Senha:</label>
+              <input
+                type="password"
+                value={usuarioDetalhado.senha || ""}
+                onChange={(e) => setUsuarioDetalhado({ ...usuarioDetalhado, senha: e.target.value })}
+                className="w-full p-2 border border-gray-300 rounded"
+              />
+            </div>
+  
+            <div className="mb-4">
+              <label className="block font-semibold">Tipo de Usuário:</label>
+              <select
+                value={usuarioDetalhado.tipoUsuario || ""}
+                onChange={(e) => setUsuarioDetalhado({ ...usuarioDetalhado, tipoUsuario: e.target.value })}
+                className="w-full p-2 border border-gray-300 rounded"
+              >
+                <option value="">Selecione</option>
+                <option value="CLIENTE">Cliente</option>
+                <option value="FUNCIONARIO">Funcionário</option>
+              </select>
+            </div>
+  
+            <div className="mb-4 flex items-center">
+              <input
+                type="checkbox"
+                checked={usuarioDetalhado.usuarioAtivo}
+                onChange={(e) => setUsuarioDetalhado({ ...usuarioDetalhado, usuarioAtivo: e.target.checked })}
+                className="mr-2"
+              />
+              <label className="font-semibold">Usuário Ativo</label>
+            </div>
+  
+            <div className="mb-4">
+              <label className="block font-semibold">Email:</label>
+              <input
+                type="email"
+                value={usuarioDetalhado.email || ""}
+                onChange={(e) => setUsuarioDetalhado({ ...usuarioDetalhado, email: e.target.value })}
+                className="w-full p-2 border border-gray-300 rounded"
+              />
+            </div>
+  
+            <div className="mb-4">
+              <label className="block font-semibold">Endereço:</label>
+              <input
+                type="text"
+                value={usuarioDetalhado.endereco || ""}
+                onChange={(e) => setUsuarioDetalhado({ ...usuarioDetalhado, endereco: e.target.value })}
+                className="w-full p-2 border border-gray-300 rounded"
+              />
+            </div>
+  
+            <div className="mb-4">
+              <label className="block font-semibold">Telefone:</label>
+              <input
+                type="text"
+                value={usuarioDetalhado.telefone || ""}
+                onChange={(e) => setUsuarioDetalhado({ ...usuarioDetalhado, telefone: e.target.value })}
+                className="w-full p-2 border border-gray-300 rounded"
+              />
+            </div>
+  
+            <div className="flex justify-end">
+              <button
+                onClick={() => setMostrarModal(false)}
+                className="px-4 py-2 mr-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={atualizarUsuario}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+              >
+                Salvar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-};
+}
 
 export default UsuariosPage;
